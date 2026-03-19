@@ -15,4 +15,18 @@ export class UserService {
   async validatePassword(password: string, hashedPassword: string) {
     return await bcrypt.compare(password, hashedPassword);
   }
+
+  async createUserRecord(user: {
+    email: string;
+    firstName: string;
+    lastName: string;
+  }) {
+    return this.prismaService.user.create({
+      data: {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+    });
+  }
 }

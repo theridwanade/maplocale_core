@@ -5,6 +5,7 @@ import {
 } from "@nestjs/common";
 import { LoginDto } from "./dto/login.dto";
 import { UserService } from "../user/user.service";
+import { InviteDto } from "./dto/invite.dto";
 
 @Injectable()
 export class AuthService {
@@ -26,6 +27,16 @@ export class AuthService {
       throw new UnauthorizedException(`Invalid password`);
     }
 
+    const { password, ...result } = user;
+    return result;
+  }
+
+  async inviteUser(inviteDto: InviteDto) {
+    const user = await this.userService.createUserRecord({
+      email: inviteDto.email,
+      firstName: inviteDto.firstName,
+      lastName: inviteDto.lastName,
+    });
     const { password, ...result } = user;
     return result;
   }
