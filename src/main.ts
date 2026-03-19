@@ -2,10 +2,12 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import morgan from "morgan";
 import { TypedConfigService } from "./config/typed-config.service";
+import { ValidationPipe } from "@nestjs/common";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(morgan("dev"));
+  app.useGlobalPipes(new ValidationPipe());
   const configService = app.get(TypedConfigService);
 
   await app.listen(configService.get("PORT"), () => {
