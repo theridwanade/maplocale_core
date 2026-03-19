@@ -10,7 +10,7 @@ import { UserService } from "../user/user.service";
 export class AuthService {
   constructor(private readonly userService: UserService) {}
 
-  async login(loginDto: LoginDto) {
+  async validateUser(loginDto: LoginDto) {
     const user = await this.userService.getUserByEmail(loginDto.email);
     if (!user) {
       throw new NotFoundException(
@@ -26,6 +26,7 @@ export class AuthService {
       throw new UnauthorizedException(`Invalid password`);
     }
 
-    return loginDto;
+    const { password, ...result } = user;
+    return result;
   }
 }
