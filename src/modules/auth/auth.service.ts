@@ -9,7 +9,6 @@ import { UserService } from "../user/user.service";
 import { InviteDto } from "./dto/invite.dto";
 import { v4 as uuidv4 } from "uuid";
 import { EmailService } from "../email/email.service";
-import { email } from "node_modules/zod/v4/core/regexes";
 
 @Injectable()
 export class AuthService {
@@ -44,7 +43,7 @@ export class AuthService {
       firstName: inviteDto.firstName,
       lastName: inviteDto.lastName,
     });
-    const inviteLink = await this.generateInviteLink(inviteDto.email);
+    const inviteLink = await this.generateInviteLink(inviteDto.email, user.id);
     const emailResult = await this.emailService.sendContributorInvite(
       inviteDto.email,
       inviteLink.token,
@@ -59,16 +58,35 @@ export class AuthService {
     };
   }
 
-  async generateInviteLink(contributorEmail: string) {
+  async generateInviteLink(contributorEmail: string, userId: string) {
     const inviteToken = uuidv4();
     const invitation = await this.userService.createInvitation(
       contributorEmail,
+      userId,
       inviteToken,
       new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     );
     return {
       token: invitation.token,
       expiresAt: invitation.expiresAt,
+    };
+  }
+
+  async handleInviteByToken(token: string, password: string) {
+    const invitation = await this.userService.getInvitationByToken(token);
+    if (!invitation) {
+      throw new NotFoundException(`Invalid or expired invite token`);
+    }
+    const isTokenValid = new Date() <= invitation.expiresAt;
+    if (!isTokenValid) {
+      throw new NotFoundException(
+        `Invalid or expired invite token, ask admin to send an invite again`,
+      );
+    }
+    await this.userService.updateUserPassword(invitation.userId!, password);
+    await this.userService.updateUserInvitation(token, { used: true });
+    return {
+      message: `User registered successfully, proceed to login`,
     };
   }
 }

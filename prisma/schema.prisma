@@ -17,22 +17,31 @@ enum Role {
   ADMIN
   USER
 }
-
 model User {
-  id             String  @id @default(uuid())
-  email          String  @unique
-  role           Role    @default(USER)
-  firstName      String? @map("first_name")
-  lastName       String? @map("last_name")
+  id             String       @id @default(uuid())
+  email          String       @unique
+  role           Role         @default(USER)
+  firstName      String?      @map("first_name")
+  lastName       String?      @map("last_name")
   password       String?
-  isVerified     Boolean @default(false) @map("is_verified")
-  hasSetPassword Boolean @default(false) @map("has_set_password")
+  isVerified     Boolean      @default(false) @map("is_verified")
+  hasSetPassword Boolean      @default(false) @map("has_set_password")
+  
+  // Fix: add relation fields
+  invitations    Invitation[] @relation("UserInvitations")
 }
 
 model Invitation {
   id        String   @id @default(uuid())
   token     String   @unique
   email     String
+  userId    String?  @map("user_id")
+  used      Boolean  @default(false)
   expiresAt DateTime
   createdAt DateTime @default(now())
+  
+  // Fix: add relation name
+  user      User?    @relation("UserInvitations", fields: [userId], references: [id])
+  
+  @@index([userId])
 }

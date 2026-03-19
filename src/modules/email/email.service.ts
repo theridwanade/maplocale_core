@@ -21,7 +21,7 @@ export class EmailService {
       subject: "You have been invited to contribute to MapLocale",
       html: `
       <p>You have been invited to contribute to MapLocale.</p>
-      <p>Click <a href="${this.configService.get("MAPLOCALE_URL")}/invite/${token}">here</a> to accept the invitation.</p>
+      <p>Click <a href="${this.configService.get("MAPLOCALE_URL")}/auth/invite/${token}">here</a> to accept the invitation.</p>
       <p>This invitation will expire at ${expiresAt.toLocaleString()}.</p>
       `,
     });

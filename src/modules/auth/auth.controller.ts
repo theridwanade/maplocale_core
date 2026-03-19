@@ -1,4 +1,11 @@
-import { Controller, Post, UseGuards, Request, Body } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  Body,
+  Param,
+} from "@nestjs/common";
 import { LocalAuthGuard } from "./guards/local-auth.guard";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { RolesGuard } from "./guards/roles.guard";
@@ -21,5 +28,13 @@ export class AuthController {
   @Post("invite")
   async invite(@Body() inviteDto: InviteDto) {
     return await this.authService.inviteUser(inviteDto);
+  }
+
+  @Post("invite/:token")
+  async inviteByToken(
+    @Param("token") token: string,
+    @Body() body: { password: string },
+  ) {
+    return await this.authService.handleInviteByToken(token, body.password);
   }
 }

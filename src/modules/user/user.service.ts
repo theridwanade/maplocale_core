@@ -30,13 +30,44 @@ export class UserService {
     });
   }
 
-  async createInvitation(email: string, token: string, expiresAt: Date) {
+  async createInvitation(
+    email: string,
+    userId: string,
+    token: string,
+    expiresAt: Date,
+  ) {
     return await this.prismaService.invitation.create({
       data: {
         email,
+        userId: userId,
         token,
         expiresAt,
       },
+    });
+  }
+
+  async getInvitationByToken(token: string) {
+    return await this.prismaService.invitation.findUnique({
+      where: { token },
+    });
+  }
+
+  async updateUserPassword(userId: string, password: string) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    return await this.prismaService.user.update({
+      where: { id: userId },
+      data: {
+        password: hashedPassword,
+        isVerified: true,
+        hasSetPassword: true,
+      },
+    });
+  }
+
+  async updateUserInvitation(token: string, data: { used?: boolean }) {
+    return await this.prismaService.invitation.update({
+      where: { token },
+      data,
     });
   }
 }
