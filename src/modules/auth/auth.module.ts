@@ -32,5 +32,6 @@ import { EmailService } from "../email/email.service";
     JwtStrategy,
     EmailService,
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}
