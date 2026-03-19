@@ -5,6 +5,7 @@ export const configSchema = z.object({
     .enum(["development", "production", "test"])
     .default("development"),
   PORT: z.coerce.number(),
+  DATABASE_URL: z.string(),
 });
 
 export type Config = z.infer<typeof configSchema>;
