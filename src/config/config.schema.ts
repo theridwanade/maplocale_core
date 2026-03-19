@@ -6,6 +6,7 @@ export const configSchema = z.object({
     .default("development"),
   PORT: z.coerce.number(),
   DATABASE_URL: z.string(),
+  BCRYPT_SALT: z.coerce.number(),
 });
 
 export type Config = z.infer<typeof configSchema>;
