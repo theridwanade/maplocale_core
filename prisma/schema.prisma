@@ -22,7 +22,8 @@ model User {
   id             String  @id @default(uuid())
   email          String  @unique
   role           Role    @default(USER)
-  name           String?
+  firstName      String? @map("first_name")
+  lastName       String? @map("last_name")
   password       String?
   isVerified     Boolean @default(false) @map("is_verified")
   hasSetPassword Boolean @default(false) @map("has_set_password")
