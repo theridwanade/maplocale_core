@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import * as bcrypt from "bcrypt";
+import { Role } from "src/prisma/generated/enums";
 
 @Injectable()
 export class UserService {
@@ -20,12 +21,14 @@ export class UserService {
     email: string;
     firstName: string;
     lastName: string;
+    role?: Role;
   }) {
     return this.prismaService.user.create({
       data: {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        role: user.role ?? "USER",
       },
     });
   }

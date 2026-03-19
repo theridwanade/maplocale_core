@@ -58,6 +58,7 @@ export class AuthService {
       email: inviteDto.email,
       firstName: inviteDto.firstName,
       lastName: inviteDto.lastName,
+      role: inviteDto.role,
     });
     const inviteLink = await this.generateInviteLink(inviteDto.email, user.id);
     const emailResult = await this.emailService.sendContributorInvite(
