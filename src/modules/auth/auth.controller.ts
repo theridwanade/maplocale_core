@@ -16,8 +16,8 @@ export class AuthController {
     return req.user;
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles("admin")
   @Post("invite")
   async invite(@Body() inviteDto: InviteDto) {
     return await this.authService.inviteUser(inviteDto);

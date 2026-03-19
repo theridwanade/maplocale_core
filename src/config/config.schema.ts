@@ -8,6 +8,8 @@ export const configSchema = z.object({
   DATABASE_URL: z.string(),
   BCRYPT_SALT: z.coerce.number(),
   JWT_SECRET: z.string(),
+  RESEND_API_KEY: z.string(),
+  MAPLOCALE_URL: z.string(),
 });
 
 export type Config = z.infer<typeof configSchema>;

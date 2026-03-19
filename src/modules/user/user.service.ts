@@ -29,4 +29,14 @@ export class UserService {
       },
     });
   }
+
+  async createInvitation(email: string, token: string, expiresAt: Date) {
+    return await this.prismaService.invitation.create({
+      data: {
+        email,
+        token,
+        expiresAt,
+      },
+    });
+  }
 }

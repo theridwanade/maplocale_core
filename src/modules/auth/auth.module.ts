@@ -9,6 +9,7 @@ import { LocalStrategy } from "./strategies/local.strategy";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { JwtModule } from "@nestjs/jwt";
 import { TypedConfigService } from "src/config/typed-config.service";
+import { EmailService } from "../email/email.service";
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { TypedConfigService } from "src/config/typed-config.service";
     PrismaService,
     LocalStrategy,
     JwtStrategy,
+    EmailService,
   ],
 })
 export class AuthModule {}

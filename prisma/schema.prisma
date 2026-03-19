@@ -28,3 +28,11 @@ model User {
   isVerified     Boolean @default(false) @map("is_verified")
   hasSetPassword Boolean @default(false) @map("has_set_password")
 }
+
+model Invitation {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  email     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
