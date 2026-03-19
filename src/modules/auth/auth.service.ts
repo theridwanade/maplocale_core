@@ -9,12 +9,15 @@ import { UserService } from "../user/user.service";
 import { InviteDto } from "./dto/invite.dto";
 import { v4 as uuidv4 } from "uuid";
 import { EmailService } from "../email/email.service";
+import { JwtService } from "@nestjs/jwt";
+import { UserDto } from "./dto/user.dto";
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly emailService: EmailService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async validateUser(loginDto: LoginDto) {
@@ -35,6 +38,19 @@ export class AuthService {
 
     const { password, ...result } = user;
     return result;
+  }
+
+  login(user: UserDto) {
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    return {
+      access_token: this.jwtService.sign(payload),
+      user,
+    };
   }
 
   async inviteUser(inviteDto: InviteDto) {
