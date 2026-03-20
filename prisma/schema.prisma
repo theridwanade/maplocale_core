@@ -1,34 +1,53 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider     = "prisma-client"
-  output       = "../src/prisma/generated"
-  moduleFormat = "cjs"
+  provider        = "prisma-client"
+  output          = "../src/prisma/generated"
+  moduleFormat    = "cjs"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
+  provider   = "postgresql"
+  extensions = [postgis]
 }
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
 
 enum Role {
   ADMIN
-  USER
+  CONTRIBUTOR
 }
+
+enum MappingMode {
+  WALKING
+  CYCLING
+  DRIVING
+}
+
+enum SessionStatus {
+  PENDING
+  APPROVED
+  FLAGGED
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
 model User {
-  id             String       @id @default(uuid())
-  email          String       @unique
-  role           Role         @default(USER)
-  firstName      String?      @map("first_name")
-  lastName       String?      @map("last_name")
+  id             String           @id @default(uuid())
+  email          String           @unique
+  role           Role             @default(CONTRIBUTOR)
+  firstName      String?          @map("first_name")
+  lastName       String?          @map("last_name")
   password       String?
-  isVerified     Boolean      @default(false) @map("is_verified")
-  hasSetPassword Boolean      @default(false) @map("has_set_password")
-  
-  // Fix: add relation fields
-  invitations    Invitation[] @relation("UserInvitations")
+  isVerified     Boolean          @default(false)   @map("is_verified")
+  hasSetPassword Boolean          @default(false)   @map("has_set_password")
+  invitations    Invitation[]     @relation("UserInvitations")
+  mappingSessions MappingSession[] @relation("CartographerSessions")
+  reviewedSessions MappingSession[] @relation("ReviewedSessions")
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now())
 }
 
 model Invitation {
@@ -39,9 +58,60 @@ model Invitation {
   used      Boolean  @default(false)
   expiresAt DateTime
   createdAt DateTime @default(now())
-  
-  // Fix: add relation name
   user      User?    @relation("UserInvitations", fields: [userId], references: [id])
-  
+
   @@index([userId])
+}
+
+model MappingSession {
+  id      String @id @default(uuid())
+  userId  String @map("user_id")
+  user    User   @relation("CartographerSessions", fields: [userId], references: [id])
+
+  // PostGIS geometry — stored as native PostGIS type
+  // Read/write via raw queries using ST_GeomFromGeoJSON / ST_AsGeoJSON
+  geometry Unsupported("geometry(LineString, 4326)")?
+
+  // Raw GPS trace — immutable after submission, source of truth forever
+  rawGpsTrace Json @map("raw_gps_trace")
+
+  // Recording metadata
+  mappingMode     MappingMode @map("mapping_mode")
+  intervalSeconds Float       @map("interval_seconds")
+  totalPoints     Int         @map("total_points")
+
+  // Device context
+  browser            String?
+  userAgent          String? @map("user_agent")
+  platform           String?
+  browserGpsSettings Json?   @map("browser_gps_settings")
+
+  // Location naming hierarchy
+  // country, state, lga — auto filled via reverse geocoding
+  // town, area, streetName — manually entered by cartographer
+  country    String  @default("Nigeria")
+  state      String?
+  lga        String?
+  town       String?
+  area       String?
+  streetName String? @map("street_name")
+
+  // QA pipeline
+  status      SessionStatus @default(PENDING)
+  flagReason  String?       @map("flag_reason")
+  reviewedBy  String?       @map("reviewed_by")
+  reviewer    User?         @relation("ReviewedSessions", fields: [reviewedBy], references: [id])
+  reviewedAt  DateTime?     @map("reviewed_at")
+
+  // Timestamps
+  startedAt   DateTime  @map("started_at")
+  endedAt     DateTime  @map("ended_at")
+  submittedAt DateTime  @default(now()) @map("submitted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @map("updated_at")
+
+  @@index([userId])
+  @@index([status])
+  @@index([state, lga])
+  @@index([streetName])
 }
