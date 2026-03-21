@@ -10,6 +10,10 @@ async function bootstrap() {
   app.use(morgan("dev"));
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.use(cookieParser());
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  });
   const configService = app.get(TypedConfigService);
 
   await app.listen(configService.get("PORT"), () => {
