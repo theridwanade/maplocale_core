@@ -10,6 +10,7 @@ export const configSchema = z.object({
   JWT_SECRET: z.string(),
   RESEND_API_KEY: z.string(),
   MAPLOCALE_URL: z.string(),
+  MAPLOCALE_CONSOLE_URL: z.string(),
 });
 
 export type Config = z.infer<typeof configSchema>;

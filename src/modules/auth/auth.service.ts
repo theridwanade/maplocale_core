@@ -28,6 +28,12 @@ export class AuthService {
       );
     }
 
+    if (!user.hasSetPassword) {
+      throw new UnauthorizedException(
+        `User has been invited but has not set a password yet`,
+      );
+    }
+
     const isPasswordValid = await this.userService.validatePassword(
       loginDto.password,
       user.password!,
