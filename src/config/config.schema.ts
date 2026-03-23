@@ -11,6 +11,7 @@ export const configSchema = z.object({
   RESEND_API_KEY: z.string(),
   MAPLOCALE_URL: z.string(),
   MAPLOCALE_CONSOLE_URL: z.string(),
+  CORS_ORIGIN: z.string(),
 });
 
 export type Config = z.infer<typeof configSchema>;
