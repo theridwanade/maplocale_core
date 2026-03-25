@@ -112,4 +112,49 @@ export class AuthService {
       message: `User registered successfully, proceed to login`,
     };
   }
+
+  async requestPasswordResetToken(email: string) {
+    const user = await this.userService.getUserByEmail(email);
+    if (!user) {
+      throw new NotFoundException(`User not found`);
+    }
+    const { token } = await this.generatePasswordResetToken(user.id);
+    await this.emailService.sendPasswordReset(email, token);
+    return {
+      message: `Password reset link sent to your email`,
+    };
+  }
+
+  async generatePasswordResetToken(userId: string) {
+    const token = uuidv4();
+    const passwordResetToken = await this.userService.createPasswordResetToken(
+      userId,
+      token,
+      new Date(Date.now() + 24 * 60 * 60 * 1000),
+    );
+
+    return {
+      token: passwordResetToken.token,
+    };
+  }
+
+  async resetPassword(token: string, password: string) {
+    const passwordResetToken =
+      await this.userService.getPasswordResetToken(token);
+    if (!passwordResetToken) {
+      throw new NotFoundException(`Invalid or expired password reset token`);
+    }
+    const isTokenValid = new Date() <= passwordResetToken.expiresAt;
+    if (!isTokenValid) {
+      throw new NotFoundException(`Invalid or expired password reset token`);
+    }
+    await this.userService.updateUserPassword(
+      passwordResetToken.userId,
+      password,
+    );
+    await this.userService.deletePasswordResetToken(token);
+    return {
+      message: `Password reset successfully, proceed to login`,
+    };
+  }
 }

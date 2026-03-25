@@ -32,4 +32,22 @@ export class EmailService {
 
     return data;
   }
+
+  async sendPasswordReset(email: string, token: string) {
+    const { data, error } = await this.resend.emails.send({
+      from: "MapLocale <noreply.maplocale@theridwanade.me>",
+      to: email,
+      subject: "Reset your MapLocale password",
+      html: `
+      <p>You have requested to reset your MapLocale password.</p>
+      <p>Click <a href="${this.configService.get("MAPLOCALE_CONSOLE_URL")}/auth/password-reset/${token}">here</a> to reset your password.</p>
+      `,
+    });
+
+    if (error) {
+      console.error(error);
+    }
+
+    return data;
+  }
 }

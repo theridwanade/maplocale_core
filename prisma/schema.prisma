@@ -35,19 +35,20 @@ enum SessionStatus {
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model User {
-  id             String           @id @default(uuid())
-  email          String           @unique
-  role           Role             @default(CONTRIBUTOR)
-  firstName      String?          @map("first_name")
-  lastName       String?          @map("last_name")
-  password       String?
-  isVerified     Boolean          @default(false)   @map("is_verified")
-  hasSetPassword Boolean          @default(false)   @map("has_set_password")
-  invitations    Invitation[]     @relation("UserInvitations")
-  mappingSessions MappingSession[] @relation("CartographerSessions")
-  reviewedSessions MappingSession[] @relation("ReviewedSessions")
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @default(now())
+  id                  String               @id @default(uuid())
+  email               String               @unique
+  role                Role                 @default(CONTRIBUTOR)
+  firstName           String?              @map("first_name")
+  lastName            String?              @map("last_name")
+  password            String?
+  isVerified          Boolean              @default(false) @map("is_verified")
+  hasSetPassword      Boolean              @default(false) @map("has_set_password")
+  invitations         Invitation[]         @relation("UserInvitations")
+  mappingSessions     MappingSession[]     @relation("CartographerSessions")
+  reviewedSessions    MappingSession[]     @relation("ReviewedSessions")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @default(now())
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Invitation {
@@ -63,10 +64,21 @@ model Invitation {
   @@index([userId])
 }
 
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
 model MappingSession {
-  id      String @id @default(uuid())
-  userId  String @map("user_id")
-  user    User   @relation("CartographerSessions", fields: [userId], references: [id])
+  id     String @id @default(uuid())
+  userId String @map("user_id")
+  user   User   @relation("CartographerSessions", fields: [userId], references: [id])
 
   // PostGIS geometry — stored as native PostGIS type
   // Read/write via raw queries using ST_GeomFromGeoJSON / ST_AsGeoJSON
@@ -97,18 +109,18 @@ model MappingSession {
   streetName String? @map("street_name")
 
   // QA pipeline
-  status      SessionStatus @default(PENDING)
-  flagReason  String?       @map("flag_reason")
-  reviewedBy  String?       @map("reviewed_by")
-  reviewer    User?         @relation("ReviewedSessions", fields: [reviewedBy], references: [id])
-  reviewedAt  DateTime?     @map("reviewed_at")
+  status     SessionStatus @default(PENDING)
+  flagReason String?       @map("flag_reason")
+  reviewedBy String?       @map("reviewed_by")
+  reviewer   User?         @relation("ReviewedSessions", fields: [reviewedBy], references: [id])
+  reviewedAt DateTime?     @map("reviewed_at")
 
   // Timestamps
-  startedAt   DateTime  @map("started_at")
-  endedAt     DateTime  @map("ended_at")
-  submittedAt DateTime  @default(now()) @map("submitted_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @default(now()) @map("updated_at")
+  startedAt   DateTime @map("started_at")
+  endedAt     DateTime @map("ended_at")
+  submittedAt DateTime @default(now()) @map("submitted_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @map("updated_at")
 
   @@index([userId])
   @@index([status])

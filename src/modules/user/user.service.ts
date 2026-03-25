@@ -73,4 +73,30 @@ export class UserService {
       data,
     });
   }
+
+  async createPasswordResetToken(
+    userId: string,
+    token: string,
+    expiresAt: Date,
+  ) {
+    return await this.prismaService.passwordResetToken.create({
+      data: {
+        userId,
+        token,
+        expiresAt,
+      },
+    });
+  }
+
+  async getPasswordResetToken(token: string) {
+    return await this.prismaService.passwordResetToken.findUnique({
+      where: { token },
+    });
+  }
+
+  async deletePasswordResetToken(token: string) {
+    return await this.prismaService.passwordResetToken.delete({
+      where: { token },
+    });
+  }
 }

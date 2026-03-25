@@ -6,6 +6,7 @@ import {
   Body,
   Param,
   Res,
+  BadRequestException,
 } from "@nestjs/common";
 import { LocalAuthGuard } from "./guards/local-auth.guard";
 import { InviteDto } from "./dto/invite.dto";
@@ -51,5 +52,21 @@ export class AuthController {
     @Body() body: { password: string },
   ) {
     return await this.authService.handleInviteByToken(token, body.password);
+  }
+
+  @Post("password-reset/request")
+  async requestPasswordReset(@Body() body: { email: string }) {
+    if (!body.email) {
+      throw new BadRequestException(`Email is required`);
+    }
+    return await this.authService.requestPasswordResetToken(body.email);
+  }
+
+  @Post("password-reset/:token")
+  async resetPassword(
+    @Param("token") token: string,
+    @Body() body: { password: string },
+  ) {
+    return await this.authService.resetPassword(token, body.password);
   }
 }
