@@ -41,8 +41,7 @@ model User {
   firstName           String?              @map("first_name")
   lastName            String?              @map("last_name")
   password            String?
-  isVerified          Boolean              @default(false) @map("is_verified")
-  hasSetPassword      Boolean              @default(false) @map("has_set_password")
+  isActive            Boolean              @default(false) @map("is_active")
   invitations         Invitation[]         @relation("UserInvitations")
   mappingSessions     MappingSession[]     @relation("CartographerSessions")
   reviewedSessions    MappingSession[]     @relation("ReviewedSessions")
@@ -68,6 +67,7 @@ model PasswordResetToken {
   id        String   @id @default(uuid())
   token     String   @unique
   userId    String   @map("user_id")
+  used      Boolean  @default(false)
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])

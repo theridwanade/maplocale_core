@@ -61,8 +61,7 @@ export class UserService {
       where: { id: userId },
       data: {
         password: hashedPassword,
-        isVerified: true,
-        hasSetPassword: true,
+        isActive: true,
       },
     });
   }

@@ -28,10 +28,8 @@ export class AuthService {
       );
     }
 
-    if (!user.hasSetPassword) {
-      throw new UnauthorizedException(
-        `User has been invited but has not set a password yet`,
-      );
+    if (!user.isActive) {
+      throw new UnauthorizedException(`User is not active, contact admin to activate account!`);
     }
 
     const isPasswordValid = await this.userService.validatePassword(
