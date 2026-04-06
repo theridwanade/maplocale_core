@@ -3,6 +3,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { Injectable } from "@nestjs/common";
 import { TypedConfigService } from "src/config/typed-config.service";
 import { Request } from "express";
+import { JwtPayload } from "src/common/types/jwt-payload.type";
 
 const cookieExtractor = (req: Request): string | null => {
   if (req && req.cookies) {
@@ -21,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
-    return { userId: payload.sub, email: payload.email, role: payload.role };
+  validate(payload: JwtPayload) {
+    return payload;
   }
 }
