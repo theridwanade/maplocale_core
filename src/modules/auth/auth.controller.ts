@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   UseGuards,
   Request,
   Body,
@@ -28,6 +29,7 @@ export class AuthController {
   @Post("login")
   login(@Request() req, @Res({ passthrough: true }) res: Response) {
     const { access_token, user } = this.authService.login(req.user);
+    console.log(access_token);
     res.cookie("access_token", access_token, {
       httpOnly: true,
       secure: this.configService.get("NODE_ENV") === "production",
@@ -68,5 +70,11 @@ export class AuthController {
     @Body() body: { password: string },
   ) {
     return await this.authService.resetPassword(token, body.password);
+  }
+  
+  @Get("me")
+  @UseGuards(JwtAuthGuard)
+  async getMe(@Request() req, @Res({ passthrough: true }) res: Response) {
+    return await this.authService.getMe(req.user.userId)
   }
 }

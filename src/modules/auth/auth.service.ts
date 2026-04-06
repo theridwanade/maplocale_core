@@ -29,7 +29,9 @@ export class AuthService {
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException(`User is not active, contact admin to activate account!`);
+      throw new UnauthorizedException(
+        `User is not active, contact admin to activate account!`,
+      );
     }
 
     const isPasswordValid = await this.userService.validatePassword(
@@ -154,5 +156,14 @@ export class AuthService {
     return {
       message: `Password reset successfully, proceed to login`,
     };
+  }
+
+  async getMe(userId: string) {
+    const user = await this.userService.getUserById(userId);
+    if (!user) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
+    const { password, ...result } = user;
+    return result;
   }
 }
