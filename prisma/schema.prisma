@@ -22,14 +22,20 @@ enum Role {
 
 enum MappingMode {
   WALKING
-  CYCLING
   DRIVING
+  CYCLING
+  OTHER
 }
 
 enum SessionStatus {
-  PENDING
+  ABANDONED
+  ACTIVE
+  ABORTED
   APPROVED
-  FLAGGED
+  CANCELLED
+  COMPLETED
+  FLAGED
+  PENDING
 }
 
 // ─── Models ──────────────────────────────────────────────────────────────────
@@ -43,11 +49,10 @@ model User {
   password            String?
   isActive            Boolean              @default(false) @map("is_active")
   invitations         Invitation[]         @relation("UserInvitations")
-  mappingSessions     MappingSession[]     @relation("CartographerSessions")
-  reviewedSessions    MappingSession[]     @relation("ReviewedSessions")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @default(now())
   passwordResetTokens PasswordResetToken[]
+  mappingSessions     MappingSession[]
 }
 
 model Invitation {
@@ -78,52 +83,26 @@ model PasswordResetToken {
 model MappingSession {
   id     String @id @default(uuid())
   userId String @map("user_id")
-  user   User   @relation("CartographerSessions", fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
-  // PostGIS geometry — stored as native PostGIS type
-  // Read/write via raw queries using ST_GeomFromGeoJSON / ST_AsGeoJSON
-  geometry Unsupported("geometry(LineString, 4326)")?
+  // Session identity
+  name        String
+  mappingMode MappingMode   @default(WALKING) @map("mapping_mode")
+  status      SessionStatus @default(ACTIVE)
 
-  // Raw GPS trace — immutable after submission, source of truth forever
-  rawGpsTrace Json @map("raw_gps_trace")
+  // Geometry
+  rawTrack     Json?                                      @map("raw_track") // GeoJSON from console, pre-processing
+  cleanedTrack Unsupported("geometry(LineString, 4326)")? @map("cleaned_track") // PostGIS geometry, post-processing
 
-  // Recording metadata
-  mappingMode     MappingMode @map("mapping_mode")
-  intervalSeconds Float       @map("interval_seconds")
-  totalPoints     Int         @map("total_points")
+  // Validation
+  isValid Boolean? @default(false) @map("is_valid")
 
-  // Device context
-  browser            String?
-  userAgent          String? @map("user_agent")
-  platform           String?
-  browserGpsSettings Json?   @map("browser_gps_settings")
-
-  // Location naming hierarchy
-  // country, state, lga — auto filled via reverse geocoding
-  // town, area, streetName — manually entered by cartographer
-  country    String  @default("Nigeria")
-  state      String?
-  lga        String?
-  town       String?
-  area       String?
-  streetName String? @map("street_name")
-
-  // QA pipeline
-  status     SessionStatus @default(PENDING)
-  flagReason String?       @map("flag_reason")
-  reviewedBy String?       @map("reviewed_by")
-  reviewer   User?         @relation("ReviewedSessions", fields: [reviewedBy], references: [id])
-  reviewedAt DateTime?     @map("reviewed_at")
-
-  // Timestamps
-  startedAt   DateTime @map("started_at")
-  endedAt     DateTime @map("ended_at")
-  submittedAt DateTime @default(now()) @map("submitted_at")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @default(now()) @map("updated_at")
+  // Timing
+  startedAt DateTime  @default(now()) @map("started_at")
+  endedAt   DateTime? @map("ended_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
   @@index([userId])
-  @@index([status])
-  @@index([state, lga])
-  @@index([streetName])
+  @@index([cleanedTrack], type: Gist, map: "mapping_sessions_cleaned_track_gist_idx")
+  @@map("mapping_sessions")
 }
