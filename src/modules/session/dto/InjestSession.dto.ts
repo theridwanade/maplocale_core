@@ -1,24 +1,21 @@
-import {
-  IsObject,
-  IsArray,
-  ArrayMinSize,
-  ValidateNested,
-  IsEnum,
-} from "class-validator";
+import { IsArray, ValidateNested, IsNumber, IsOptional } from "class-validator";
 import { Type } from "class-transformer";
 
-class RawTrackDto {
-  @IsEnum(["LineString"])
-  type: "LineString";
-
-  @IsArray()
-  @ArrayMinSize(2) // a line needs at least 2 points
-  coordinates: [number, number][];
+// IngestSessionDto
+export class RawPointDto {
+  @IsNumber() timestamp: number;
+  @IsNumber() latitude: number;
+  @IsNumber() longitude: number;
+  @IsNumber() accuracy: number;
+  @IsNumber() @IsOptional() altitude: number | null;
+  @IsNumber() @IsOptional() altitudeAccuracy: number | null;
+  @IsNumber() @IsOptional() heading: number | null;
+  @IsNumber() @IsOptional() speed: number | null;
 }
 
 export class IngestSessionDto {
-  @IsObject()
-  @ValidateNested()
-  @Type(() => RawTrackDto)
-  rawTrack: RawTrackDto;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RawPointDto)
+  points: RawPointDto[];
 }
