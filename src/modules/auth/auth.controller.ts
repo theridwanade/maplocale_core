@@ -70,10 +70,17 @@ export class AuthController {
   ) {
     return await this.authService.resetPassword(token, body.password);
   }
-  
+
   @Get("me")
   @UseGuards(JwtAuthGuard)
   async getMe(@Request() req, @Res({ passthrough: true }) res: Response) {
-    return await this.authService.getMe(req.user.sub)
+    return await this.authService.getMe(req.user.sub);
+  }
+
+  @Get("logout")
+  @UseGuards(JwtAuthGuard)
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie("access_token", { path: "/" });
+    return { message: "Logged out successfully" };
   }
 }
