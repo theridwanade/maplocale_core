@@ -32,7 +32,7 @@ export class AuthController {
     res.cookie("access_token", access_token, {
       httpOnly: true,
       secure: this.configService.get("NODE_ENV") === "production",
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000, // 1 day requires login each day for session tracing auth
       path: "/",
     });
